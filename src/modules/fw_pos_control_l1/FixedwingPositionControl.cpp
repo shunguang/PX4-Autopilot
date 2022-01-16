@@ -867,6 +867,7 @@ FixedwingPositionControl::control_auto(const hrt_abstime &now, const Vector2d &c
 	const uint8_t position_sp_type = handle_setpoint_type(current_sp.type, current_sp);
 
 	_position_sp_type = position_sp_type;
+	Vector2f curr_pos_local{_local_pos.x, _local_pos.y};
 
 	switch (position_sp_type) {
 	case position_setpoint_s::SETPOINT_TYPE_IDLE:
@@ -876,15 +877,15 @@ FixedwingPositionControl::control_auto(const hrt_abstime &now, const Vector2d &c
 		break;
 
 	case position_setpoint_s::SETPOINT_TYPE_POSITION:
-		control_auto_position(now, dt, curr_pos, ground_speed, pos_sp_prev, current_sp);
+		control_auto_position(now, dt, curr_pos_local, ground_speed, pos_sp_prev, current_sp);
 		break;
 
 	case position_setpoint_s::SETPOINT_TYPE_VELOCITY:
-		control_auto_velocity(now, dt, curr_pos, ground_speed, pos_sp_prev, pos_sp_curr);
+		control_auto_velocity(now, dt, ground_speed, pos_sp_prev, pos_sp_curr);
 		break;
 
 	case position_setpoint_s::SETPOINT_TYPE_LOITER:
-		control_auto_loiter(now, dt, curr_pos, ground_speed, pos_sp_prev, current_sp, pos_sp_next);
+		control_auto_loiter(now, dt, curr_pos_local, ground_speed, pos_sp_prev, current_sp, pos_sp_next);
 		break;
 
 	case position_setpoint_s::SETPOINT_TYPE_LAND:
@@ -1093,7 +1094,7 @@ FixedwingPositionControl::handle_setpoint_type(const uint8_t setpoint_type, cons
 }
 
 void
-FixedwingPositionControl::control_auto_position(const hrt_abstime &now, const float dt, const Vector2d &curr_pos,
+FixedwingPositionControl::control_auto_position(const hrt_abstime &now, const float dt, const Vector2f &curr_pos,
 		const Vector2f &ground_speed, const position_setpoint_s &pos_sp_prev, const position_setpoint_s &pos_sp_curr)
 {
 	const float acc_rad = (_param_fw_use_npfg.get()) ? _npfg.switchDistance(500.0f) : _l1_control.switch_distance(500.0f);
@@ -1103,6 +1104,7 @@ FixedwingPositionControl::control_auto_position(const hrt_abstime &now, const fl
 
 	/* current waypoint (the one currently heading for) */
 	curr_wp = Vector2d(pos_sp_curr.lat, pos_sp_curr.lon);
+	Vector2f curr_wp_local = _global_local_proj_ref.project(pos_sp_curr.lat, pos_sp_curr.lon);
 
 	if (pos_sp_prev.valid) {
 		prev_wp(0) = pos_sp_prev.lat;
@@ -1116,6 +1118,8 @@ FixedwingPositionControl::control_auto_position(const hrt_abstime &now, const fl
 		prev_wp(0) = pos_sp_curr.lat;
 		prev_wp(1) = pos_sp_curr.lon;
 	}
+
+	Vector2f prev_wp_local = _global_local_proj_ref.project(prev_wp(0), prev_wp(1));
 
 	float tecs_fw_thr_min;
 	float tecs_fw_thr_max;
@@ -1177,9 +1181,6 @@ FixedwingPositionControl::control_auto_position(const hrt_abstime &now, const fl
 		}
 	}
 
-	Vector2f curr_pos_local{_local_pos.x, _local_pos.y};
-	Vector2f curr_wp_local = _global_local_proj_ref.project(pos_sp_curr.lat, pos_sp_curr.lon);
-	Vector2f prev_wp_local = _global_local_proj_ref.project(prev_wp(0), prev_wp(1));
 	float target_airspeed = get_auto_airspeed_setpoint(now, pos_sp_curr.cruising_speed, ground_speed, dt);
 
 	if (_param_fw_use_npfg.get()) {
@@ -1208,8 +1209,8 @@ FixedwingPositionControl::control_auto_position(const hrt_abstime &now, const fl
 }
 
 void
-FixedwingPositionControl::control_auto_velocity(const hrt_abstime &now, const float dt, const Vector2d &curr_pos,
-		const Vector2f &ground_speed, const position_setpoint_s &pos_sp_prev, const position_setpoint_s &pos_sp_curr)
+FixedwingPositionControl::control_auto_velocity(const hrt_abstime &now, const float dt, const Vector2f &ground_speed,
+		const position_setpoint_s &pos_sp_prev, const position_setpoint_s &pos_sp_curr)
 {
 	float tecs_fw_thr_min;
 	float tecs_fw_thr_max;
@@ -1273,7 +1274,7 @@ FixedwingPositionControl::control_auto_velocity(const hrt_abstime &now, const fl
 }
 
 void
-FixedwingPositionControl::control_auto_loiter(const hrt_abstime &now, const float dt, const Vector2d &curr_pos,
+FixedwingPositionControl::control_auto_loiter(const hrt_abstime &now, const float dt, const Vector2f &curr_pos,
 		const Vector2f &ground_speed, const position_setpoint_s &pos_sp_prev, const position_setpoint_s &pos_sp_curr,
 		const position_setpoint_s &pos_sp_next)
 {
@@ -1458,6 +1459,7 @@ FixedwingPositionControl::control_auto_takeoff(const hrt_abstime &now, const flo
 		Vector2f curr_wp_local = _global_local_proj_ref.project(pos_sp_curr.lat, pos_sp_curr.lon);
 		Vector2f prev_wp_local = _global_local_proj_ref.project(_runway_takeoff.getStartWP()(0),
 					 _runway_takeoff.getStartWP()(1));
+
 		if (_param_fw_use_npfg.get()) {
 			_npfg.setAirspeedNom(target_airspeed * _eas2tas);
 			_npfg.setAirspeedMax(_param_fw_airspd_max.get() * _eas2tas);
@@ -2071,6 +2073,7 @@ FixedwingPositionControl::control_manual_position(const hrt_abstime &now, const 
 			Vector2f curr_wp_local = _global_local_proj_ref.project(curr_wp(0), curr_wp(1));
 			Vector2f prev_wp_local = _global_local_proj_ref.project(prev_wp(0), prev_wp(1));
 			_l1_control.navigate_waypoints(prev_wp_local, curr_wp_local, curr_pos_local, ground_speed);
+
 			if (_param_fw_use_npfg.get()) {
 				_npfg.setAirspeedNom(target_airspeed * _eas2tas);
 				_npfg.setAirspeedMax(_param_fw_airspd_max.get() * _eas2tas);
