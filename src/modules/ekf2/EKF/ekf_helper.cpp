@@ -716,10 +716,17 @@ void Ekf::setEkfGlobalOrigin(const double latitude, const double longitude, cons
 	double current_lon = static_cast<double>(NAN);
 	float current_alt  = 0.f;
 
+	PX4_WARN("setEkfGlobalOrigin pos_ref initialized %d", _pos_ref.isInitialized());
+	PX4_WARN("setEkfGlobalOrigin isHorizontalAidingActive() %d", isHorizontalAidingActive());
+
 	// if we are already doing aiding, correct for the change in position since the EKF started navigating
 	if (_pos_ref.isInitialized() && isHorizontalAidingActive()) {
+
 		_pos_ref.reproject(_state.pos(0), _state.pos(1), current_lat, current_lon);
+		PX4_WARN("setEkfGlobalOrigin reproject (%.3f, %.3f) -> LAT: %.5f LON: %.5f", (double)_state.pos(0), (double)_state.pos(1), current_lat, current_lon);
+
 		current_alt = -_state.pos(2) + _gps_alt_ref;
+		PX4_WARN("setEkfGlobalOrigin current_alt %.3f, Z: %.3f, gps_alt_ref: %.3f", (double)current_alt, (double)_state.pos(2), (double)_gps_alt_ref);
 		current_pos_available = true;
 	}
 
@@ -729,10 +736,12 @@ void Ekf::setEkfGlobalOrigin(const double latitude, const double longitude, cons
 	if (current_pos_available) {
 		// reset horizontal position
 		Vector2f position = _pos_ref.project(current_lat, current_lon);
+		PX4_WARN("setEkfGlobalOrigin reset horizontal position (%.3f, %.3f)", (double)position(0), (double)position(1));
 		resetHorizontalPositionTo(position);
 
 		// reset altitude
 		_gps_alt_ref = altitude;
+		PX4_WARN("setEkfGlobalOrigin reset altitude %.3f", (double)(_gps_alt_ref - current_alt));
 		resetVerticalPositionTo(_gps_alt_ref - current_alt);
 
 	} else {
