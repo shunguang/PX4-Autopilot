@@ -116,6 +116,13 @@ void SensorRangeFinder::updateStuckCheck()
 {
 	// Check for "stuck" range finder measurements when range was not valid for certain period
 	// This handles a failure mode observed with some lidar sensors
+	//swu:
+	if (_time_last_valid_us == ULLONG_MAX) { //first time call
+		_time_last_valid_us = _sample.time_us;
+		_is_stuck = false;
+		return;
+	}
+
 	if (((_sample.time_us - _time_last_valid_us) > (uint64_t)10e6)) {
 
 		// require a variance of rangefinder values to check for "stuck" measurements

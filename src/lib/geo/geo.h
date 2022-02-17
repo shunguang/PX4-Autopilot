@@ -51,6 +51,10 @@
 #include <lib/mathlib/mathlib.h>
 #include <lib/matrix/matrix/math.hpp>
 
+#ifndef hrt_absolute_time
+# define hrt_absolute_time() (0)
+#endif
+
 static constexpr float CONSTANTS_ONE_G = 9.80665f;						// m/s^2
 
 static constexpr float CONSTANTS_STD_PRESSURE_PA = 101325.0f;					// pascals (Pa)

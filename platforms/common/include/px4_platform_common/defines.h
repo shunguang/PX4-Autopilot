@@ -39,7 +39,9 @@
 
 #pragma once
 
+#if !_WINDOWS
 #include <px4_platform_common/log.h>
+#endif
 
 /****************************************************************************
  * Defines for all platforms.
@@ -50,8 +52,13 @@
 
 /* Define PX4_ISFINITE */
 #ifdef __cplusplus
+#ifdef WIN32
+static inline bool PX4_ISFINITE(float x)  { return isfinite(x); }
+static inline bool PX4_ISFINITE(double x) { return isfinite(x); }
+#else
 static inline constexpr bool PX4_ISFINITE(float x) { return __builtin_isfinite(x); }
 static inline constexpr bool PX4_ISFINITE(double x) { return __builtin_isfinite(x); }
+#endif
 #else
 #define PX4_ISFINITE(x) __builtin_isfinite(x)
 #endif /* __cplusplus */

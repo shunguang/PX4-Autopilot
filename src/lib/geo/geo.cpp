@@ -49,10 +49,6 @@
 using matrix::wrap_pi;
 using matrix::wrap_2pi;
 
-#ifndef hrt_absolute_time
-# define hrt_absolute_time() (0)
-#endif
-
 /*
  * Azimuthal Equidistant Projection
  * formulas according to: http://mathworld.wolfram.com/AzimuthalEquidistantProjection.html

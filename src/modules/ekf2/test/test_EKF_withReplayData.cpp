@@ -39,6 +39,8 @@
 #include "sensor_simulator/ekf_wrapper.h"
 #include "sensor_simulator/ekf_logger.h"
 
+#define TEST_DATA_PATH
+
 class EkfReplayTest : public ::testing::Test
 {
 public:

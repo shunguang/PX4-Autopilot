@@ -41,7 +41,11 @@ void SensorSimulator::loadSensorDataFromFile(std::string file_name)
 
 			if (sensor_sample.timestamp < last_sample.timestamp) {
 				std::cout << "Timestamps not sorted ascendingly" << std::endl;
+#if _WINDOWS
+				std::exit(-1);
+#else
 				system_exit(-1);
+#endif
 			}
 		}
 
@@ -76,7 +80,11 @@ void SensorSimulator::loadSensorDataFromFile(std::string file_name)
 
 		} else {
 			std::cout << "Sensor type in file unknown" << std::endl;
+#if _WINDOWS
+			std::exit(-1);
+#else
 			system_exit(-1);
+#endif
 		}
 
 		getline(file, sensor_data);
@@ -86,7 +94,11 @@ void SensorSimulator::loadSensorDataFromFile(std::string file_name)
 		while (ss.good()) {
 			if (i >= 10) {
 				std::cout << "sensor data bigger than expected" << std::endl;
+#if _WINDOWS
+				std::exit(-1);
+#else
 				system_exit(-1);
+#endif
 			}
 
 			std::string value_string;
@@ -180,7 +192,11 @@ void SensorSimulator::runReplayMicroseconds(uint32_t duration)
 {
 	if (!_has_replay_data) {
 		std::cout << "Can not run replay without replay data" << std::endl;
+#if _WINDOWS
+		std::exit(-1);
+#else
 		system_exit(-1);
+#endif
 	}
 
 	// simulate in 1000us steps
@@ -218,7 +234,11 @@ void SensorSimulator::setSensorDataFromReplayData()
 
 	} else {
 		std::cerr << "Loaded replay data empty. Likely could not load replay data" << std::endl;
+#if _WINDOWS
+		std::exit(-1);
+#else
 		system_exit(-1);
+#endif
 	}
 }
 
@@ -281,10 +301,11 @@ void SensorSimulator::setSingleReplaySample(const sensor_info &sample)
 
 	} else {
 		printf("Unknown sensor type, can not set replay sample");
-		system_exit(-1);
+		std::exit(-1);
 	}
 }
 
+#if 0
 void SensorSimulator::setTrajectoryTargetVelocity(const Vector3f &velocity_target)
 {
 	for (int i = 0; i < 3; i++) {
@@ -374,6 +395,7 @@ void SensorSimulator::setSensorDataFromTrajectory()
 		_gps.setVelocity(vel_world);
 	}
 }
+#endif
 
 void SensorSimulator::setGpsLatitude(const double latitude)
 {

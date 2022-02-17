@@ -65,8 +65,11 @@ static constexpr unsigned get_lookup_table_index(float *val, float min, float ma
 
 	return static_cast<unsigned>((-(min) + *val) / SAMPLING_RES);
 }
-
+#if _WINDOWS
+static float get_table_data(float lat, float lon, const int16_t table[LAT_DIM][LON_DIM])
+#else
 static constexpr float get_table_data(float lat, float lon, const int16_t table[LAT_DIM][LON_DIM])
+#endif
 {
 	lat = math::constrain(lat, SAMPLING_MIN_LAT, SAMPLING_MAX_LAT);
 

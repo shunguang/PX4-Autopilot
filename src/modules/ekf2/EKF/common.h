@@ -43,7 +43,7 @@
 #define EKF_COMMON_H
 
 #include <matrix/math.hpp>
-
+#include <string>
 namespace estimator
 {
 
@@ -62,7 +62,8 @@ enum class velocity_frame_t : uint8_t {
 };
 
 struct gps_message {
-	uint64_t time_usec{0};
+	uint64_t fn{ 0 };
+	uint64_t time_usec{ 0 };
 	int32_t lat;		///< Latitude in 1E-7 degrees
 	int32_t lon;		///< Longitude in 1E-7 degrees
 	int32_t alt;		///< Altitude in 1E-3 meters (millimeters) above MSL
@@ -77,6 +78,12 @@ struct gps_message {
 	bool vel_ned_valid;	///< GPS ground speed is valid
 	uint8_t nsats;		///< number of satellites used
 	float pdop;		///< position dilution of precision
+
+	std::string to_string() const {
+		char buf[256];
+		snprintf(buf, 256, "%llu,%llu,%d,%d,%d", fn, time_usec, lat, lon,alt);
+		return std::string(buf);
+	}
 };
 
 struct outputSample {
@@ -84,6 +91,12 @@ struct outputSample {
 	Quatf  quat_nominal;	///< nominal quaternion describing vehicle attitude
 	Vector3f    vel;	///< NED velocity estimate in earth frame (m/sec)
 	Vector3f    pos;	///< NED position estimate in earth frame (m/sec)
+
+	std::string to_string() const {
+		char buf[256];
+		snprintf(buf, 256, "%llu, %.2f,%.2f,%.2f", time_us, pos(0), pos(1), pos(2));
+		return std::string(buf);
+	}
 };
 
 struct outputVert {
@@ -94,15 +107,24 @@ struct outputVert {
 };
 
 struct imuSample {
+	uint64_t    fn{ 0 };
 	uint64_t    time_us{0};		///< timestamp of the measurement (uSec)
 	Vector3f    delta_ang;		///< delta angle in body frame (integrated gyro measurements) (rad)
 	Vector3f    delta_vel;		///< delta velocity in body frame (integrated accelerometer measurements) (m/sec)
 	float       delta_ang_dt;	///< delta angle integration period (sec)
 	float       delta_vel_dt;	///< delta velocity integration period (sec)
-	bool        delta_vel_clipping[3] {}; ///< true (per axis) if this sample contained any accelerometer clipping
+	bool        delta_vel_clipping[3]{}; ///< true (per axis) if this sample contained any accelerometer clipping
+
+	std::string to_string() const {
+		char buf[256];
+		snprintf(buf, 256, "%llu, %llu", fn, time_us);
+		return std::string(buf);
+	}
+
 };
 
 struct gpsSample {
+	uint64_t		fn{ 0 };
 	uint64_t    time_us{0};	///< timestamp of the measurement (uSec)
 	Vector2f    pos;	///< NE earth frame gps horizontal position measurement (m)
 	float       hgt;	///< gps height measurement (m)
@@ -111,22 +133,54 @@ struct gpsSample {
 	float	    hacc;	///< 1-std horizontal position error (m)
 	float	    vacc;	///< 1-std vertical position error (m)
 	float       sacc;	///< 1-std speed error (m/sec)
+
+	std::string to_string() const {
+		char buf[256];
+		snprintf(buf, 256, "%llu,%llu", fn, time_us);
+		return std::string(buf);
+	}
 };
 
 struct magSample {
+	magSample(const uint64_t t_us=0, const Vector3f& m= Vector3f()) : fn(0), time_us(t_us), mag(m) {}
+	std::string to_string() const {
+		char buf[256];
+		snprintf(buf, 256, "%llu,%llu,%.6f,%.6f,%.6f", fn, time_us, mag(0), mag(1), mag(2));
+		return std::string(buf);
+	}
+
+	uint64_t		fn{ 0 };
 	uint64_t    time_us{0};	///< timestamp of the measurement (uSec)
-	Vector3f    mag;	///< NED magnetometer body frame measurements (Gauss)
+	Vector3f    mag{};	///< NED magnetometer body frame measurements (Gauss)
 };
 
 struct baroSample {
+	baroSample(const uint64_t t_us=0, const float h=0) : fn(0), time_us(t_us), hgt(h) {}
+	std::string to_string() const {
+		char buf[256];
+		snprintf(buf, 256, "%llu,%llu,%.1f", fn, time_us, hgt);
+		return std::string(buf);
+	}
+
+
+	uint64_t		fn{ 0 };
 	uint64_t    time_us{0};	///< timestamp of the measurement (uSec)
-	float       hgt;	///< pressure altitude above sea level (m)
+	float       hgt{ 0 };	///< pressure altitude above sea level (m)
 };
 
 struct rangeSample {
+	rangeSample(const uint64_t t_us = 0, const float r = 0, const int8_t q = 0) : fn(0), time_us(t_us), rng(r), quality(q) {}
+	uint64_t		fn{ 0 };
 	uint64_t    time_us{0};	///< timestamp of the measurement (uSec)
 	float       rng;	    ///< range (distance to ground) measurement (m)
 	int8_t	    quality;    ///< Signal quality in percent (0...100%), where 0 = invalid signal, 100 = perfect signal, and -1 = unknown signal quality.
+
+	std::string to_string() const {
+		char buf[256];
+		snprintf(buf, 256, "%llu, %llu,%.1f,%d", fn, time_us, rng, quality);
+		return std::string(buf);
+	}
+
 };
 
 struct airspeedSample {
@@ -136,11 +190,19 @@ struct airspeedSample {
 };
 
 struct flowSample {
+	uint64_t fn{ 0 };
 	uint64_t time_us{0};	///< timestamp of the integration period leading edge (uSec)
 	Vector2f flow_xy_rad;	///< measured delta angle of the image about the X and Y body axes (rad), RH rotation is positive
 	Vector3f gyro_xyz;	///< measured delta angle of the inertial frame about the body axes obtained from rate gyro measurements (rad), RH rotation is positive
 	float    dt;		///< amount of integration time (sec)
 	uint8_t  quality;	///< quality indicator between 0 and 255
+
+	std::string to_string() const {
+		char buf[256];
+		snprintf(buf, 256, "%llu,%llu,%.6f,%.6f,dt=%.6f,q=%d", fn, time_us, flow_xy_rad(0), flow_xy_rad(1), dt, quality);
+		return std::string(buf);
+	}
+
 };
 
 struct extVisionSample {

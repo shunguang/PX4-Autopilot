@@ -69,7 +69,8 @@ public:
 
 	// should be called every time new data is pushed into the filter
 	bool update();
-
+	float getEstHeading() const;
+	float getPredMagHeading(const magSample *magSmp=nullptr);
 	void getGpsVelPosInnov(float hvel[2], float &vvel, float hpos[2], float &vpos) const;
 	void getGpsVelPosInnovVar(float hvel[2], float &vvel, float hpos[2], float &vpos) const;
 	void getGpsVelPosInnovRatio(float &hvel, float &vvel, float &hpos, float &vpos) const;

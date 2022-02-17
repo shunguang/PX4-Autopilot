@@ -1817,3 +1817,28 @@ void Ekf::resetGpsDriftCheckFilters()
 	_gps_velNE_filt.setZero();
 	_gps_pos_deriv_filt.setZero();
 }
+
+
+float Ekf::getEstHeading() const
+{
+	Dcmf R_to_earth = Dcmf(_state.quat_nominal);  //XYZ-body  --> NED earth
+	float hdg = getEuler321Yaw(R_to_earth);
+	return hdg;
+}
+
+float Ekf::getPredMagHeading( const magSample *magSmp )
+{
+	Dcmf R_to_earth1 = Dcmf(_state.quat_nominal);
+	const Dcmf R_to_earth = updateEuler312YawInRotMat(0.f, R_to_earth1);
+
+	Vector3f mag_earth_pred;
+	if (magSmp) {
+		mag_earth_pred = R_to_earth * (magSmp->mag - _state.mag_B);
+	}
+	else {
+		mag_earth_pred = R_to_earth * (_mag_sample_delayed.mag - _state.mag_B);
+	}
+	// the angle of the projection onto the horizontal gives the yaw angle
+	float measured_hdg = -atan2f(mag_earth_pred(1), mag_earth_pred(0)) + getMagDeclination();
+	return measured_hdg;
+}

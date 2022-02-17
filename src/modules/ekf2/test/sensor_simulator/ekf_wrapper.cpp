@@ -237,3 +237,9 @@ matrix::Vector3f EkfWrapper::getDeltaVelBiasVariance() const
 {
 	return _ekf->covariances_diagonal().slice<3, 1>(13, 0);
 }
+
+void EkfWrapper::setMagFuseType(int type)
+{
+	assert(type >= MAG_FUSE_TYPE_AUTO && type <= MAG_FUSE_TYPE_NONE);
+	_ekf_params->mag_fusion_type = type;
+}

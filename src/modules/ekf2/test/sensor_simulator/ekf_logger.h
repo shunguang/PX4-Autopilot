@@ -56,7 +56,9 @@ public:
 	void enableVarianceLogging() { _variance_logging_enabled = true; };
 	void disableVarianceLogging() { _variance_logging_enabled = false; };
 
-	void writeStateToFile();
+	//-1 dont wrt into file, 0-mark gps as off, 1-make gps as on
+	void writeStateToFile(const int gps_flag=-1);
+	std::string printParams() const;
 
 private:
 	std::shared_ptr<Ekf> _ekf;
@@ -70,7 +72,7 @@ private:
 	bool _state_logging_enabled {true};
 	bool _variance_logging_enabled {true};
 
-	void writeState();
+	void writeState(const int gps_flag=-1);
 
 };
 #endif // !EKF_EKF_LOGGER_H

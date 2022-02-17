@@ -24,7 +24,11 @@ namespace matrix
 {
 
 #if !defined(FLT_EPSILON)
+#ifdef WIN32 || _WINDOWS
+#define FLT_EPSILON	1.192092896e-07F
+#else
 #define FLT_EPSILON     __FLT_EPSILON__
+#endif
 #endif
 
 #if defined(__PX4_NUTTX)

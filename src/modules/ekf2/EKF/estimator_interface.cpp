@@ -491,7 +491,7 @@ bool EstimatorInterface::initialise_interface(uint64_t timestamp)
 	}
 
 	// calculate the IMU buffer length required to accommodate the maximum delay with some allowance for jitter
-	_imu_buffer_length = ceilf(max_time_delay_ms / FILTER_UPDATE_PERIOD_MS);
+	_imu_buffer_length = ceilf(max_time_delay_ms / FILTER_UPDATE_PERIOD_MS) + 1;
 
 	// set the observation buffer length to handle the minimum time of arrival between observations in combination
 	// with the worst case delay from current time to ekf fusion time

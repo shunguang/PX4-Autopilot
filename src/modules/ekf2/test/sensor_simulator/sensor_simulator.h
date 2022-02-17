@@ -49,7 +49,8 @@
 #include <sstream>
 #include <vector>
 #include <array>
-#include <motion_planning/VelocitySmoothing.hpp>
+//swu
+//#include <motion_planning/VelocitySmoothing.hpp>
 
 #include "imu.h"
 #include "mag.h"
@@ -127,7 +128,8 @@ public:
 	RangeFinder _rng;
 	Vio         _vio;
 
-	VelocitySmoothing _trajectory[3];
+	//swu
+	//VelocitySmoothing _trajectory[3];
 
 private:
 	void setSensorDataToDefault();
