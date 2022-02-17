@@ -49,7 +49,8 @@ void EkfLogger::writeStateToFile(const int gps_flag)
 #if _WINDOWS
 		std::exit(-1);
 #else
-		system_exit(-1);
+		std::exit(-1);
+//		system_exit(-1);
 #endif
 	}
 

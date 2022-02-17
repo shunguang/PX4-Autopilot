@@ -44,7 +44,8 @@ void SensorSimulator::loadSensorDataFromFile(std::string file_name)
 #if _WINDOWS
 				std::exit(-1);
 #else
-				system_exit(-1);
+				std::exit(-1);
+//				system_exit(-1);
 #endif
 			}
 		}
@@ -83,7 +84,8 @@ void SensorSimulator::loadSensorDataFromFile(std::string file_name)
 #if _WINDOWS
 			std::exit(-1);
 #else
-			system_exit(-1);
+			std::exit(-1);
+//			system_exit(-1);
 #endif
 		}
 
@@ -97,7 +99,8 @@ void SensorSimulator::loadSensorDataFromFile(std::string file_name)
 #if _WINDOWS
 				std::exit(-1);
 #else
-				system_exit(-1);
+				std::exit(-1);
+//				system_exit(-1);
 #endif
 			}
 
@@ -195,7 +198,8 @@ void SensorSimulator::runReplayMicroseconds(uint32_t duration)
 #if _WINDOWS
 		std::exit(-1);
 #else
-		system_exit(-1);
+		std::exit(-1);
+		//		system_exit(-1);
 #endif
 	}
 
@@ -237,7 +241,8 @@ void SensorSimulator::setSensorDataFromReplayData()
 #if _WINDOWS
 		std::exit(-1);
 #else
-		system_exit(-1);
+		std::exit(-1);
+//		system_exit(-1);
 #endif
 	}
 }

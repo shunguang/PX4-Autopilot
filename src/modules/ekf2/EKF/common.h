@@ -44,6 +44,8 @@
 
 #include <matrix/math.hpp>
 #include <string>
+#include <climits>
+
 namespace estimator
 {
 

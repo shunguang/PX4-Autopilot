@@ -44,6 +44,10 @@
 #define _PX4_LOG_LEVEL_ERROR		3
 #define _PX4_LOG_LEVEL_PANIC		4
 
+#ifndef __EXPORT
+#define __EXPORT
+#endif
+
 // Used to silence unused variable warning
 static inline void do_nothing(int level, ...)
 {
