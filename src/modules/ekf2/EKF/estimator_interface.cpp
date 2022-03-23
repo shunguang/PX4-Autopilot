@@ -206,7 +206,7 @@ void EstimatorInterface::setGpsData(const gps_message &gps)
 
 		_gps_buffer->push(gps_sample_new);
 	} else {
-		ECL_ERR("GPS data too fast %" PRIu64, gps.time_usec - _time_last_gps);
+		ECL_ERR("GPS data too fast %" PRIu64 ", _min_obs_interval_us=%u", gps.time_usec - _time_last_gps, _min_obs_interval_us);
 	}
 }
 
@@ -241,7 +241,7 @@ void EstimatorInterface::setBaroData(const baroSample &baro_sample)
 
 		_baro_buffer->push(baro_sample_new);
 	} else {
-		ECL_ERR("baro data too fast %" PRIu64, baro_sample.time_us - _time_last_baro);
+		ECL_ERR("baro data too fast t=%llu, _time_last_baro=%llu,  dt=%llu, _min_obs_interval_us=%u", baro_sample.time_us, _time_last_baro, baro_sample.time_us - _time_last_baro, _min_obs_interval_us);
 	}
 }
 
@@ -325,7 +325,8 @@ void EstimatorInterface::setOpticalFlowData(const flowSample &flow)
 	}
 
 	// limit data rate to prevent data being lost
-	if ((flow.time_us - _time_last_optflow) > _min_obs_interval_us) {
+	uint64_t dt = (flow.time_us - _time_last_optflow);
+	if ( dt > _min_obs_interval_us) {
 		_time_last_optflow = flow.time_us;
 
 		flowSample optflow_sample_new = flow;
@@ -334,6 +335,10 @@ void EstimatorInterface::setOpticalFlowData(const flowSample &flow)
 		optflow_sample_new.time_us -= FILTER_UPDATE_PERIOD_MS * 1000 / 2;
 
 		_flow_buffer->push(optflow_sample_new);
+	}
+	else {
+		ECL_ERR("flow data too fast imgId=%llu, t_us=%llu, integartion_dt=%f(sec), _time_last_optflow=%llu,  dt=%llu, _min_obs_interval_us=%u", flow.fn, flow.time_us, flow.dt, _time_last_optflow, dt, _min_obs_interval_us);
+
 	}
 }
 

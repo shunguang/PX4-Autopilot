@@ -124,9 +124,9 @@ void SensorSimulator::loadSensorDataFromFile(std::string file_name)
 
 void SensorSimulator::setSensorRateToDefault()
 {
-	_imu.setRateHz(200);
-	_mag.setRateHz(80);
-	_baro.setRateHz(80);
+	_imu.setRateHz(100);   //original 200 with FILTER_UPDATE_PERIOD_MS{10}
+	_mag.setRateHz(50);   //original 80 w/ FILTER_UPDATE_PERIOD_MS{10}
+	_baro.setRateHz(50);  //original 80 w/FILTER_UPDATE_PERIOD_MS{10}
 	_gps.setRateHz(5);
 	_flow.setRateHz(50);
 	_rng.setRateHz(30);
