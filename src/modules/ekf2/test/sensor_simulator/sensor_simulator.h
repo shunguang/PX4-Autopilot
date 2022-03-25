@@ -50,7 +50,7 @@
 #include <vector>
 #include <array>
 //swu
-//#include <motion_planning/VelocitySmoothing.hpp>
+#include <motion_planning/VelocitySmoothing.hpp>
 
 #include "imu.h"
 #include "mag.h"
@@ -129,7 +129,7 @@ public:
 	Vio         _vio;
 
 	//swu
-	//VelocitySmoothing _trajectory[3];
+	VelocitySmoothing _trajectory[3];
 
 private:
 	void setSensorDataToDefault();

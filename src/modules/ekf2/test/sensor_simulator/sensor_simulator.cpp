@@ -310,7 +310,7 @@ void SensorSimulator::setSingleReplaySample(const sensor_info &sample)
 	}
 }
 
-#if 0
+#if 1
 void SensorSimulator::setTrajectoryTargetVelocity(const Vector3f &velocity_target)
 {
 	for (int i = 0; i < 3; i++) {

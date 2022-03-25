@@ -73,7 +73,7 @@ public:
 };
 
 //swu
-#if 0
+#if 1
 TEST_F(EKFYawEstimatorTest, inAirYawAlignment)
 {
 	// GIVEN: an accelerating vehicle with unknown heading

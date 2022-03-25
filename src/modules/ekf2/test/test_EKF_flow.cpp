@@ -102,7 +102,7 @@ void EkfFlowTest::setFlowFromHorizontalVelocityAndDistance(flowSample &flow_samp
 			 -simulated_horz_velocity(0) * flow_sample.dt / estimated_distance_to_ground);
 }
 //swu
-#if 0
+#if 1
 TEST_F(EkfFlowTest, resetToFlowVelocityInAir)
 {
 	ResetLoggingChecker reset_logging_checker(_ekf);
