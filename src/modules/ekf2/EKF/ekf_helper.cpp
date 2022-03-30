@@ -83,8 +83,15 @@ void Ekf::resetHorizontalVelocityToOpticalFlow()
 		// we should have reliable OF measurements so
 		// calculate X and Y body relative velocities from OF measurements
 		Vector3f vel_optflow_body;
+//swu
+#if 1
 		vel_optflow_body(0) = - range * _flow_compensated_XY_rad(1) / _flow_sample_delayed.dt;
 		vel_optflow_body(1) =   range * _flow_compensated_XY_rad(0) / _flow_sample_delayed.dt;
+#else
+		vel_optflow_body(0) = range * _flow_compensated_XY_rad(0) / _flow_sample_delayed.dt;
+		vel_optflow_body(1) = range * _flow_compensated_XY_rad(1) / _flow_sample_delayed.dt;
+#endif
+
 		vel_optflow_body(2) = 0.0f;
 
 		// rotate from body to earth frame

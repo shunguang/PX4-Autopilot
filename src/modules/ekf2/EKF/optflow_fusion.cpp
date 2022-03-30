@@ -104,12 +104,24 @@ void Ekf::fuseOptFlow()
 
 	// compute the velocities in body and local frames from corrected optical flow measurement
 	// for logging only
+//swu
+#if 1
 	_flow_vel_body(0) = -opt_flow_rate(1) * range;
 	_flow_vel_body(1) = opt_flow_rate(0) * range;
+#else
+	_flow_vel_body(0) = opt_flow_rate(0) * range;
+	_flow_vel_body(1) = opt_flow_rate(1) * range;
+#endif
+
 	_flow_vel_ne = Vector2f(_R_to_earth * Vector3f(_flow_vel_body(0), _flow_vel_body(1), 0.f));
 
+#if 1
 	_flow_innov(0) =  vel_body(1) / range - opt_flow_rate(0); // flow around the X axis
 	_flow_innov(1) = -vel_body(0) / range - opt_flow_rate(1); // flow around the Y axis
+#else
+	_flow_innov(0) = vel_body(0) / range - opt_flow_rate(0); // flow around the X axis
+	_flow_innov(1) = vel_body(1) / range - opt_flow_rate(1); // flow around the Y axis
+#endif
 
 	// The derivation allows for an arbitrary body to flow sensor frame rotation which is
 	// currently not supported by the EKF, so assume sensor frame is aligned with the

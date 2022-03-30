@@ -94,6 +94,29 @@ void EkfFlowTest::startZeroFlowFusion()
 	_sensor_simulator.startFlow();
 }
 
+//---------------------------------------------------------------------------------
+//swu:
+//camera cordinate                     IMU Body
+// ------------->flow.X             Y /|\  
+// |                                   | 
+// |                                   |
+// |                                   |
+//\|/ flow.Y                           ------------->Y
+//---------------------------------------------------------
+//this is the reason why 
+//  flow.X =  Y
+//  flow.Y = -X
+//and inside EKF, the (flow.x, flow.y) will translate to body coordinate by
+// X = -flow.Y
+// Y =  flow.X
+// see line 108 in  void Ekf::fuseOptFlow(): e.g.
+// _flow_vel_body(0) = -opt_flow_rate(1) * range;
+// _flow_vel_body(1) = opt_flow_rate(0) * range;
+// 
+// but I donot under stand  line 406 at control.cpp:
+//	_flow_compensated_XY_rad = _flow_sample_delayed.flow_xy_rad - _flow_sample_delayed.gyro_xyz.xy();
+//  since <flow_xy_rad> is in image coordinate system and <gyro_xyz.xy()> is in IMU body coordinate system
+//---------------------------------------------------------------------------------
 void EkfFlowTest::setFlowFromHorizontalVelocityAndDistance(flowSample &flow_sample,
 		const Vector2f &simulated_horz_velocity, float estimated_distance_to_ground)
 {
@@ -101,6 +124,7 @@ void EkfFlowTest::setFlowFromHorizontalVelocityAndDistance(flowSample &flow_samp
 		Vector2f(simulated_horz_velocity(1) * flow_sample.dt / estimated_distance_to_ground,
 			 -simulated_horz_velocity(0) * flow_sample.dt / estimated_distance_to_ground);
 }
+
 //swu
 #if 1
 TEST_F(EkfFlowTest, resetToFlowVelocityInAir)
