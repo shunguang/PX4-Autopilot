@@ -337,7 +337,7 @@ void EstimatorInterface::setOpticalFlowData(const flowSample &flow)
 		_flow_buffer->push(optflow_sample_new);
 	}
 	else {
-		ECL_ERR("flow data too fast imgId=%llu, t_us=%llu, integartion_dt=%f(sec), _time_last_optflow=%llu,  dt=%llu, _min_obs_interval_us=%u", flow.fn, flow.time_us, flow.dt, _time_last_optflow, dt, _min_obs_interval_us);
+		ECL_ERR("flow data too fast imgId = % llu, t_us = % llu, integartion_dt = % f(sec), _time_last_optflow = % llu, dt = % llu, _min_obs_interval_us = % u", flow.fn, flow.time_us, flow.dt, _time_last_optflow, dt, _min_obs_interval_us);
 
 	}
 }

@@ -13,7 +13,7 @@ void EkfLogger::setFilePath(std::string file_path)
 	_file_path = file_path;
 }
 
-void EkfLogger::writeStateToFile(const int gps_flag)
+void EkfLogger::writeStateToFile(const int gps_nsat)
 {
 	if (!_file_opened) {
 		_file.open(_file_path);
@@ -32,9 +32,7 @@ void EkfLogger::writeStateToFile(const int gps_flag)
 			}
 		}
 
-		if (gps_flag >= 0) {
-			_file << ", gpsOnOff";
-		}
+		_file << ", gps_nsta";
 
 		_file << ", estHeading, predictedMagHeading" ;
 
@@ -42,25 +40,18 @@ void EkfLogger::writeStateToFile(const int gps_flag)
 	}
 
 	if (_file) {
-		writeState( gps_flag );
-
-	} else {
-		std::cerr << "Can not write to output file" << std::endl;
-#if _WINDOWS
-		std::exit(-1);
-#else
-		std::exit(-1);
-//		system_exit(-1);
-#endif
+		writeState(gps_nsat);
 	}
-
+	else {
+		std::cout << "Can not write to output file" << std::endl;
+	}
 }
 
-void EkfLogger::writeState(const int gps_flag)
+void EkfLogger::writeState(const int gps_nsat)
 {
 	if (_state_logging_enabled) {
-		uint64_t time = _ekf->get_imu_sample_delayed().time_us;
-		_file << time;
+		uint64_t time_us = _ekf->get_imu_sample_delayed().time_us;
+		_file << time_us;
 
 		if (_state_logging_enabled) {
 			matrix::Vector<float, 24> state = _ekf->getStateAtFusionHorizonAsVector();
@@ -77,15 +68,12 @@ void EkfLogger::writeState(const int gps_flag)
 				_file << "," << variance(i);
 			}
 		}
-
-		if (gps_flag >= 0) {
-			_file << "," << gps_flag;
-		}
-		
+		//get heading
 		float h1 = _ekf->getEstHeading();
 		float h2 = _ekf->getPredMagHeading();
-		_file << "," << h1 <<"," << h2;
 
+		_file << "," << gps_nsat;
+		_file << "," << h1 <<"," << h2;
 		_file << std::endl;
 	}
 }

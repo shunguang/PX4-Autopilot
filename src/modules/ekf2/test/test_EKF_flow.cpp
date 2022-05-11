@@ -42,7 +42,7 @@
 #include "sensor_simulator/ekf_wrapper.h"
 #include "test_helper/reset_logging_checker.h"
 
-
+using namespace std;
 class EkfFlowTest : public ::testing::Test
 {
 public:
@@ -123,7 +123,11 @@ void EkfFlowTest::setFlowFromHorizontalVelocityAndDistance(flowSample &flow_samp
 	flow_sample.flow_xy_rad =
 		Vector2f(simulated_horz_velocity(1) * flow_sample.dt / estimated_distance_to_ground,
 			 -simulated_horz_velocity(0) * flow_sample.dt / estimated_distance_to_ground);
-}
+
+	printf("fn=%llu, time_us=%llu, horz vel(vx=%.5f, vy=%.5f), flw_rad(x=%.5f, y=%.5f), d=%.2f\n", 
+		flow_sample.fn, flow_sample.time_us,  simulated_horz_velocity(0), simulated_horz_velocity(1), 
+		flow_sample.flow_xy_rad(0), flow_sample.flow_xy_rad(1), estimated_distance_to_ground);
+ }
 
 //swu
 #if 1
@@ -293,13 +297,17 @@ TEST_F(EkfFlowTest, yawMotionCorrectionWithFlowGyroData)
 	const Vector3f flow_offset(-0.15, 0.05f, 0.2f);
 	_ekf_wrapper.setFlowOffset(flow_offset);
 
+	//swu: simulated_horz_velocity =  cross(body_rate, flow_offset);  %-->cross production operator
 	const Vector2f simulated_horz_velocity(body_rate % flow_offset);
 	flowSample flow_sample = _sensor_simulator._flow.dataAtRest();
 	setFlowFromHorizontalVelocityAndDistance(flow_sample, simulated_horz_velocity, simulated_distance_to_ground);
+	cout << flow_sample.to_string() << endl;
 
 	// use flow sensor gyro data
 	// for clarification of the sign, see definition of flowSample
 	flow_sample.gyro_xyz = -body_rate * flow_sample.dt;
+
+	cout << "flow_sample=" << flow_sample.to_string() << endl;
 
 	_sensor_simulator._flow.setData(flow_sample);
 	_sensor_simulator._imu.setGyroData(body_rate);
@@ -312,4 +320,38 @@ TEST_F(EkfFlowTest, yawMotionCorrectionWithFlowGyroData)
 			<< "estimated vel = " << estimated_horz_velocity(0);
 	EXPECT_NEAR(estimated_horz_velocity(1), 0.f, 0.01f)
 			<< "estimated vel = " << estimated_horz_velocity(1);
+}
+
+TEST_F(EkfFlowTest, understandHorVelAndFlowRad)
+{
+	// WHEN: fusing range finder and optical flow data in air
+	const float simulated_distance_to_ground = 10.f;
+	Vector2f horz_v;
+	flowSample flow_sample = _sensor_simulator._flow.dataAtRest();
+
+	horz_v(0) = 1, horz_v(1) = 0;
+	setFlowFromHorizontalVelocityAndDistance(flow_sample, horz_v, simulated_distance_to_ground);
+	cout << "vxy=(" << horz_v(0) << "," << horz_v(1) << ")" << "flw=" << flow_sample.to_string() << endl;
+
+	horz_v(0) = -1, horz_v(1) = 0;
+	setFlowFromHorizontalVelocityAndDistance(flow_sample, horz_v, simulated_distance_to_ground);
+	cout << "vxy=(" << horz_v(0) << "," << horz_v(1) << ")" << "flw=" << flow_sample.to_string() << endl;
+
+	horz_v(0) = 0, horz_v(1) = 1;
+	setFlowFromHorizontalVelocityAndDistance(flow_sample, horz_v, simulated_distance_to_ground);
+	cout << "vxy=(" << horz_v(0) << "," << horz_v(1) << ")" << "flw=" << flow_sample.to_string() << endl;
+
+	horz_v(0) = 0, horz_v(1) = -1;
+	setFlowFromHorizontalVelocityAndDistance(flow_sample, horz_v, simulated_distance_to_ground);
+	cout << "vxy=(" << horz_v(0) <<"," << horz_v(1) << ")" << "flw=" << flow_sample.to_string() << endl;
+
+
+	horz_v(0) = 1, horz_v(1) = 1;
+	setFlowFromHorizontalVelocityAndDistance(flow_sample, horz_v, simulated_distance_to_ground);
+	cout << "vxy=(" << horz_v(0) << "," << horz_v(1) << ")" << "flw=" << flow_sample.to_string() << endl;
+
+	horz_v(0) = -1, horz_v(1) = -1;
+	setFlowFromHorizontalVelocityAndDistance(flow_sample, horz_v, simulated_distance_to_ground);
+	cout << "vxy=(" << horz_v(0) << "," << horz_v(1) << ")" << "flw=" << flow_sample.to_string() << endl;
+
 }

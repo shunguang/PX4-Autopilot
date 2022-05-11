@@ -201,7 +201,8 @@ struct flowSample {
 
 	std::string to_string() const {
 		char buf[256];
-		snprintf(buf, 256, "%llu,%llu,%.6f,%.6f,dt=%.6f,q=%d", fn, time_us, flow_xy_rad(0), flow_xy_rad(1), dt, quality);
+		snprintf(buf, 256, "%llu,%llu,flow_xy_rad(%.6f, %.6f), gyro_xyz(%.6f, %.6f, %.6f), dt=%.6f,q=%d", 
+			fn, time_us, flow_xy_rad(0), flow_xy_rad(1), gyro_xyz(0), gyro_xyz(1), gyro_xyz(2), dt, quality);
 		return std::string(buf);
 	}
 
